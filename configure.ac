@@ -1,7 +1,7 @@
 AC_INIT([cpuminer-opt], [24.4])
 
 AC_PREREQ([2.59c])
-AC_CANONICAL_SYSTEM
+AC_CANONICAL_HOST
 AC_CONFIG_SRCDIR([cpu-miner.c])
 AC_CONFIG_HEADERS([cpuminer-config.h])
 AC_CONFIG_MACRO_DIR([m4])
@@ -12,7 +12,7 @@ dnl Make sure anyone changing configure.ac/Makefile.am has a clue
 AM_MAINTAINER_MODE
 
 dnl Checks for programs
-AC_PROG_CC_C99
+AC_PROG_CC
 AC_PROG_GCC_TRADITIONAL
 AM_PROG_CC_C_O
 AM_PROG_AS
@@ -20,7 +20,6 @@ AC_PROG_RANLIB
 AC_PROG_CXX
 
 dnl Checks for header files
-AC_HEADER_STDC
 AC_CHECK_HEADERS([sys/endian.h sys/param.h syslog.h])
 # sys/sysctl.h requires sys/types.h on FreeBSD
 # sys/sysctl.h requires sys/param.h on OpenBSD
@@ -40,34 +39,6 @@ AC_CHECK_DECLS([be32dec, le32dec, be32enc, le32enc, le16dec, le16enc], [], [],
 
 AC_FUNC_ALLOCA
 AC_CHECK_FUNCS([getopt_long])
-
-MINGW_TARGET=`$CC -dumpmachine 2>&1`
-case $MINGW_TARGET in
-  arm*-*-*)
-    have_arm=true
-    ;;
-  i*86-*-mingw*)
-    have_x86=true
-    have_win32=true
-    CFLAGS="-Icompat/pthreads $CFLAGS"
-    PTHREAD_LDFLAGS="-Lcompat/pthreads/x86"
-    WS2_LIBS="-lws2_32"
-    ;;
-  x86_64-*-mingw*|amd64-*-mingw*)
-    have_x86_64=true
-    have_win32=true
-    CFLAGS="-Icompat/pthreads $CFLAGS"
-    PTHREAD_LDFLAGS="-Lcompat/pthreads/x64"
-    # SHOULD BE AT END! after -lcrypto #
-    WS2_LIBS="-L/mingw/x86_64-w64-mingw32/lib -lws2_32"
-    ;;
-  i*86-*-*)
-    have_x86=true
-    ;;
-  x86_64-*-*|amd64-*-*)
-    have_x86_64=true
-    ;;
-esac
 
 AC_ARG_ENABLE([assembly],
   AS_HELP_STRING([--disable-assembly], [disable assembly-language routines]))
@@ -112,14 +83,6 @@ then
 fi
 
 AC_CHECK_LIB(jansson, json_loads, request_jansson=false, request_jansson=true)
-
-# GC2 for GNU static
-if test "x$have_win32" = "xtrue" ; then
-   # MinGW
-   AC_CHECK_LIB([pthread], [pthread_create], PTHREAD_LIBS="-lpthreadGC2",[])
-else
-   AC_CHECK_LIB([pthread], [pthread_create], PTHREAD_LIBS="-lpthread",[])
-fi
 
 LDFLAGS="$PTHREAD_LDFLAGS $LDFLAGS"
 # PTHREAD_LIBS="$PTHREAD_LIBS"
