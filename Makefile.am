@@ -10,8 +10,9 @@ EXTRA_DIST	= example-cfg.json nomacro.pl
 SUBDIRS		= compat
 
 CUSTATEVEC_INCLUDES = -I$(CUDA_PATH)/include -I$(CUQUANTUM_ROOT)/include
+CUTENSORNET_INCLUDES = -I$(CUTENSORNET_ROOT)/include
 
-ALL_INCLUDES	= @PTHREAD_FLAGS@ -fno-strict-aliasing $(JANSSON_INCLUDES) $(CUSTATEVEC_INCLUDES) -I.
+ALL_INCLUDES	= @PTHREAD_FLAGS@ -fno-strict-aliasing $(JANSSON_INCLUDES) $(CUSTATEVEC_INCLUDES) $(CUTENSORNET_INCLUDES) -I.
 
 bin_PROGRAMS	= qubitcoin-miner
 
@@ -35,6 +36,7 @@ qubitcoin_miner_SOURCES = \
   algo/qhash/qhash-gate.c \
   algo/qhash/qhash.c \
   algo/qhash/qhash-custatevec.c \
+  algo/qhash/qhash-cutensornet.c \
   algo/sha/sha1.c \
   algo/sha/sha1-hash.c \
   algo/sha/sha256-hash.c \
@@ -62,7 +64,8 @@ disable_flags = -DNOASM
 CUSTATEVEC_LDFLAGS = -L$(CUDA_PATH)/lib64 -L$(CUDA_PATH)/lib -L$(CUQUANTUM_ROOT)/lib -lcustatevec_static -lcublas -lcudart # -lcustatevec_static -lcublas_static -lcublasLt_static -lculibos -lcudart_static
 
 qubitcoin_miner_LDFLAGS	= @LDFLAGS@
-qubitcoin_miner_LDADD	= @LIBCURL@ @JANSSON_LIBS@ @PTHREAD_LIBS@ @WS2_LIBS@ -lgmp $(CUSTATEVEC_LDFLAGS)
+CUTENSORNET_LDFLAGS = -L$(CUTENSORNET_ROOT)/lib -lcutensornet
+qubitcoin_miner_LDADD	= @LIBCURL@ @JANSSON_LIBS@ @PTHREAD_LIBS@ @WS2_LIBS@ -lgmp $(CUSTATEVEC_LDFLAGS) $(CUTENSORNET_LDFLAGS)
 qubitcoin_miner_CPPFLAGS = @LIBCURL_CPPFLAGS@ $(ALL_INCLUDES)
 qubitcoin_miner_CFLAGS   = -Wno-pointer-sign -Wno-pointer-to-int-cast $(disable_flags) -g -funwind-tables -fno-omit-frame-pointer
 

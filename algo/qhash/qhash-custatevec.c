@@ -45,7 +45,8 @@ static __thread custatevecHandle_t handle;
 static __thread cuComplex *dStateVec = NULL;
 static __thread size_t extraSize = 0;
 static __thread void *extra = NULL;
-bool qhash_thread_init(int)
+
+bool qhash_custatevec_thread_init(int)
 {
     custatevecStatus_t custatevecErr;
     cudaError_t cudaErr;
@@ -113,7 +114,8 @@ static void main_circuit(const unsigned char data[2 * SHA256_BLOCK_SIZE])
     }
 }
 
-void run_simulation(const unsigned char data[2 * SHA256_BLOCK_SIZE], double expectations[NUM_QUBITS])
+void run_simulation_custatevec(const unsigned char data[2 * SHA256_BLOCK_SIZE],
+                               double expectations[NUM_QUBITS])
 {
     HANDLE_CUSTATEVEC_ERROR(custatevecInitializeStateVector(handle, dStateVec, CUDA_C_32F,
                                                             NUM_QUBITS,

@@ -76,23 +76,33 @@ setup_paths() {
         exit 1
     fi
     export CUQUANTUM_ROOT
+
+    if [[ -z "$CUTENSORNET_ROOT" ]]; then
+        CUTENSORNET_ROOT="$CUQUANTUM_ROOT"
+    fi
+    export CUTENSORNET_ROOT
     
     # Библиотечные пути - настраиваем в зависимости от расположения CUDA
     if [[ "$CUDA_PATH" == "/usr" ]]; then
         # CUDA установлен в системные пути
         export CUSTATEVEC_INCLUDES="-I/usr/include -I$CUQUANTUM_ROOT/include"
-        export CUSTATEVEC_LDFLAGS="-L/usr/lib/x86_64-linux-gnu -L$CUQUANTUM_ROOT/lib -lcustatevec -lcudart -lcurl -lssl -lcrypto -ljansson -levent -lzmq"
-        export LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:$CUQUANTUM_ROOT/lib:$LD_LIBRARY_PATH"
+        export CUTENSORNET_INCLUDES="-I/usr/include -I$CUTENSORNET_ROOT/include"
+        export CUSTATEVEC_LDFLAGS="-L/usr/lib/x86_64-linux-gnu -L$CUQUANTUM_ROOT/lib -lcustatevec"
+        export CUTENSORNET_LDFLAGS="-L/usr/lib/x86_64-linux-gnu -L$CUTENSORNET_ROOT/lib -lcutensornet"
+        export LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:$CUQUANTUM_ROOT/lib:$CUTENSORNET_ROOT/lib:$LD_LIBRARY_PATH"
     else
         # CUDA установлен в отдельную директорию
         export CUSTATEVEC_INCLUDES="-I$CUDA_PATH/include -I$CUQUANTUM_ROOT/include"
-        export CUSTATEVEC_LDFLAGS="-L$CUDA_PATH/lib64 -L$CUQUANTUM_ROOT/lib -lcustatevec -lcudart -lcurl -lssl -lcrypto -ljansson -levent -lzmq"
-        export LD_LIBRARY_PATH="$CUDA_PATH/lib64:$CUQUANTUM_ROOT/lib:$LD_LIBRARY_PATH"
+        export CUTENSORNET_INCLUDES="-I$CUDA_PATH/include -I$CUTENSORNET_ROOT/include"
+        export CUSTATEVEC_LDFLAGS="-L$CUDA_PATH/lib64 -L$CUQUANTUM_ROOT/lib -lcustatevec"
+        export CUTENSORNET_LDFLAGS="-L$CUDA_PATH/lib64 -L$CUTENSORNET_ROOT/lib -lcutensornet"
+        export LD_LIBRARY_PATH="$CUDA_PATH/lib64:$CUQUANTUM_ROOT/lib:$CUTENSORNET_ROOT/lib:$LD_LIBRARY_PATH"
     fi
     
     log_success "Пути настроены:"
     log_info "  CUDA_PATH: $CUDA_PATH"
     log_info "  CUQUANTUM_ROOT: $CUQUANTUM_ROOT"
+    log_info "  CUTENSORNET_ROOT: $CUTENSORNET_ROOT"
 }
 
 # Проверка зависимостей
@@ -135,10 +145,18 @@ check_dependencies() {
         log_error "cuQuantum заголовки не найдены: $CUQUANTUM_ROOT/include/custatevec.h"
         exit 1
     fi
-    
+
     if [[ ! -f "$CUQUANTUM_ROOT/lib/libcustatevec.so" ]]; then
         log_error "cuQuantum библиотека не найдена: $CUQUANTUM_ROOT/lib/libcustatevec.so"
         exit 1
+    fi
+
+    # Проверяем cuTensorNet (опционально)
+    if [[ ! -f "$CUTENSORNET_ROOT/include/cutensornet.h" ]]; then
+        log_warning "cuTensorNet заголовки не найдены: $CUTENSORNET_ROOT/include/cutensornet.h"
+    fi
+    if [[ ! -f "$CUTENSORNET_ROOT/lib/libcutensornet.so" ]]; then
+        log_warning "cuTensorNet библиотека не найдена: $CUTENSORNET_ROOT/lib/libcutensornet.so"
     fi
     
     # Проверяем системные библиотеки
@@ -209,7 +227,9 @@ configure_build() {
         --with-curl=/usr \
         --with-crypto=/usr \
         CUSTATEVEC_INCLUDES="$CUSTATEVEC_INCLUDES" \
+        CUTENSORNET_INCLUDES="$CUTENSORNET_INCLUDES" \
         CUSTATEVEC_LDFLAGS="$CUSTATEVEC_LDFLAGS" \
+        CUTENSORNET_LDFLAGS="$CUTENSORNET_LDFLAGS" \
         LIBS="-lcurl -lssl -lcrypto -ljansson -levent -lzmq -lz" \
         CFLAGS="$CFLAGS" \
         CXXFLAGS="$CXXFLAGS" \

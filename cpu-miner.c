@@ -174,6 +174,7 @@ double net_hashrate = 0.;
 uint64_t net_blocks = 0;
 uint32_t opt_work_size = 0;
 bool     opt_bell = false;
+bool     opt_use_cutensornet = false;
 
 // conditional mining
 bool *conditional_state = NULL;
@@ -3472,6 +3473,9 @@ void parse_arg(int key, char *arg )
       break;
    case 1031:   // bell
       opt_bell = true;
+      break;
+   case 1032:   // use-cutensornet
+      opt_use_cutensornet = true;
       break;
    case 1016:			/* --coinbase-addr */
       if ( arg ) coinbase_address = strdup( arg );
