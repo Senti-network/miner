@@ -851,6 +851,7 @@ extern int pk_buffer_size;
 extern char *opt_data_file;
 extern bool opt_verify;
 extern bool opt_bell;    //  keyboard beep
+extern bool opt_use_cutensornet;
 static char const usage[] = "\
 Usage: cpuminer [OPTIONS]\n\
 Options:\n\
@@ -989,6 +990,7 @@ Options:\n\
 "\
   -B, --background      run the miner in the background\n\
       --benchmark       run in offline benchmark mode\n\
+      --use-cutensornet use cuTensorNet backend for qhash\n\
       --cpu-affinity    set process affinity to cpu core(s), mask 0x3 for cores 0 and 1\n\
       --cpu-priority    set process priority (default: 0 idle, 2 normal to 5 highest) (deprecated)\n\
   -b, --api-bind=address[:port]   IP address for the miner API, default port is 4048)\n\
@@ -1072,6 +1074,7 @@ static struct option const options[] = {
         { "stratum-keepalive", 0, NULL, 1029 },
         { "version", 0, NULL, 'V' },
         { "bell", 0, NULL, 1031 },
+        { "use-cutensornet", 0, NULL, 1032 },
         { 0, 0, 0, 0 }
 };
 

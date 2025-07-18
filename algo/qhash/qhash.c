@@ -3,6 +3,14 @@
 #include "algo/sha/sha256-hash.h"
 
 #include "qhash-gate.h"
+#include "miner.h"
+
+extern bool qhash_custatevec_thread_init(int);
+extern void run_simulation_custatevec(const unsigned char[2 * SHA256_BLOCK_SIZE],
+                                      double[NUM_QUBITS]);
+extern bool qhash_cutensornet_thread_init(int);
+extern void run_simulation_cutensornet(const unsigned char[2 * SHA256_BLOCK_SIZE],
+                                       double[NUM_QUBITS]);
 
 #define FIXED_FRACTION int16_t
 #define FIXED_INTERMEDIATE int32_t
@@ -50,4 +58,20 @@ int qhash_hash(void *output, const void *input, int thr_id)
     }
     sha256_full(output, buf, sizeof buf);
     return 1;
+}
+
+bool qhash_thread_init(int thr_id)
+{
+    return opt_use_cutensornet ?
+               qhash_cutensornet_thread_init(thr_id) :
+               qhash_custatevec_thread_init(thr_id);
+}
+
+void run_simulation(const unsigned char data[2 * SHA256_BLOCK_SIZE],
+                    double expectations[NUM_QUBITS])
+{
+    if (opt_use_cutensornet)
+        run_simulation_cutensornet(data, expectations);
+    else
+        run_simulation_custatevec(data, expectations);
 }
